@@ -187,19 +187,22 @@ async def register_and_verify(
         # Debug: check form state
         form_state = await page.evaluate("""() => {
             const errors = document.querySelectorAll(
-                '.ant-form-item-explain-error, .ant-form-item-explain, '
-                '[class*="error"], [class*="Error"]');
+                '.ant-form-item-explain-error, .ant-form-item-explain, ' +
+                '[class*="error"], [class*="Error"]'
+            );
             const errTexts = [...errors]
                 .map(e => e.textContent.trim()).filter(t => t);
-            const pwVal = document.querySelector(
-                'input[type="password"]')?.value || '';
-            const btnDisabled = document.querySelector(
-                'button[type="submit"]')?.disabled;
+            const pwInput = document.querySelector(
+                'input[type="password"]');
+            const pwVal = pwInput ? pwInput.value : '';
+            const btn = document.querySelector(
+                'button[type="submit"]');
+            const btnDisabled = btn ? btn.disabled : null;
             return {
                 errors: errTexts,
                 pwLen: pwVal.length,
                 pwValue: pwVal.substring(0, 3) + '...',
-                btnDisabled,
+                btnDisabled: btnDisabled,
             };
         }""")
         log(
