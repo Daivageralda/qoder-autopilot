@@ -17,6 +17,7 @@ CLI configuration:
 """
 
 import os
+import platform
 from pathlib import Path
 
 from pydantic import Field
@@ -30,6 +31,23 @@ from .user_config import load_user_config
 
 PACKAGE_DIR = Path(__file__).parent
 PROJECT_DIR = PACKAGE_DIR.parent.parent  # src/../.. = project root
+
+
+def _default_ninerouter_db() -> str:
+    """Return the default 9Router SQLite database path based on the current OS.
+
+    Reference: https://www.npmjs.com/package/9router (Data Location section)
+    - macOS/Linux: ~/.9router/db/data.sqlite
+    - Windows:     %APPDATA%/9router/db/data.sqlite
+    - Docker:      /app/data/db/data.sqlite (user sets manually)
+    """
+    if platform.system() == "Windows":
+        appdata = os.environ.get("APPDATA", "")
+        if appdata:
+            return os.path.join(appdata, "9router", "db", "data.sqlite")
+        # Fallback kalau APPDATA ga ada (sangat jarang)
+        return os.path.join(str(Path.home()), "AppData", "Roaming", "9router", "db", "data.sqlite")
+    return "~/.9router/db/data.sqlite"
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -129,8 +147,8 @@ class Settings(BaseSettings):
         description="9Router password (optional, not needed for DB insert)",
     )
     ninerouter_db: str = Field(
-        default="~/.9router/db/data.sqlite",
-        description="Path to 9Router SQLite database",
+        default_factory=_default_ninerouter_db,
+        description="Path to 9Router SQLite database (OS-aware default)",
     )
 
     # ── AI Captcha (optional) ─────────────────────────────────────────────
