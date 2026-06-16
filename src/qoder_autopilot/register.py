@@ -379,5 +379,8 @@ async def register_and_verify(
 
     except Exception as e:
         log_err(f"Register error: {e}")
-        await page.screenshot(path=str(config.SCREENSHOTS_DIR / "error.png"))
+        try:
+            await page.screenshot(path=str(config.SCREENSHOTS_DIR / "error.png"))
+        except Exception:
+            pass  # Browser already closed (e.g. Ctrl+C)
         return False

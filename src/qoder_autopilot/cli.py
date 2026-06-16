@@ -6,7 +6,7 @@ with optional 9Router integration.
 
 Usage:
     qoder-autopilot -n 5 --manual-captcha --parallel
-    python -m qoder_autopilot -n 3 --no-headless
+    python -m qoder_autopilot -n 3 --headless
 """
 
 import argparse
@@ -214,7 +214,7 @@ async def main_async(args: argparse.Namespace) -> None:
     except NotImplementedError:
         pass  # Windows doesn't support add_signal_handler
 
-    headless = not args.no_headless
+    headless = args.headless
     use_oauth = not args.no_oauth
     manual_captcha = args.manual_captcha
     parallel = args.parallel
@@ -412,9 +412,9 @@ def main() -> None:
         help="Number of accounts to create (1-100)",
     )
     p.add_argument(
-        "--no-headless",
+        "--headless",
         action="store_true",
-        help="Show browser windows",
+        help="Run browser in headless mode (hidden)",
     )
     p.add_argument(
         "--no-oauth",
