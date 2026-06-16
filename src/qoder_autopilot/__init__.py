@@ -12,7 +12,7 @@ Quick start::
     result = asyncio.run(run_one(manual_captcha=True))
 """
 
-__version__ = "0.6.0"
+__version__ = "0.6.1"
 
 from .auth.oauth import initiate_device_flow, poll_device_token
 from .captcha import CaptchaSolver
