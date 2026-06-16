@@ -39,7 +39,7 @@ from pathlib import Path
 
 RELAY_CONFIG_DIR = Path.home() / ".qoder-autopilot"
 RELAY_CONFIG_FILE = RELAY_CONFIG_DIR / "relay.json"
-DEFAULT_HOST = "0.0.0.0"
+DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8765
 
 

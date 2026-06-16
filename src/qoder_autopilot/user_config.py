@@ -17,6 +17,8 @@ Usage:
 """
 
 import json
+import os
+import stat
 from pathlib import Path
 
 CONFIG_DIR = Path.home() / ".qoder-autopilot"
@@ -123,6 +125,12 @@ def save_user_config(cfg: dict) -> Path:
 
     with open(CONFIG_FILE, "w") as f:
         json.dump(clean, f, indent=2)
+
+    # Restrict file permissions: owner read/write only (may contain API keys)
+    try:
+        os.chmod(CONFIG_FILE, stat.S_IRUSR | stat.S_IWUSR)  # 0o600
+    except OSError:
+        pass  # Windows may not support
 
     return CONFIG_FILE
 

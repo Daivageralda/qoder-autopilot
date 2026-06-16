@@ -70,7 +70,7 @@ async def run_one(
     # 2. Generate identity
     log("📋 Step 2/4: Generating identity...")
     ident = gen_identity()
-    log_ok(f"{ident['display_name']} | pw: {ident['password']}")
+    log_ok(f"{ident['display_name']} | pw: {'•' * 8}")
 
     # 3. Register + verify
     log("📋 Step 3/4: OAuth register + device token flow...")
@@ -379,8 +379,10 @@ def _handle_config_command(argv: list[str]) -> None:
             else:
                 source = "default"
             val_str = str(current) if current else "(empty)"
-            if key.endswith("api_key") and val_str and val_str != "(empty)":
-                val_str = val_str[:8] + "..." + val_str[-4:] if len(val_str) > 12 else "***"
+            # Mask sensitive fields (API keys, tokens, passwords)
+            sensitive_suffixes = ("api_key", "token", "password", "secret")
+            if any(key.endswith(s) for s in sensitive_suffixes) and val_str not in ("(empty)", ""):
+                val_str = val_str[:4] + "••••" + val_str[-4:] if len(val_str) > 8 else "***"
             print(f"  {info['cli_flag']:<23} {val_str:<50} {source}")
         print()
         print(f"Config file: {CONFIG_FILE}")
@@ -445,8 +447,8 @@ def _handle_relay_command(argv: list[str]) -> None:
     )
     parser.add_argument(
         "--host",
-        default="0.0.0.0",
-        help="Bind host (default: 0.0.0.0)",
+        default="127.0.0.1",
+        help="Bind host (default: 127.0.0.1 — use 0.0.0.0 for external access)",
     )
     parser.add_argument(
         "--port",

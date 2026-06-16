@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 # ── Project Metadata ──────────────────────────────
 [project]
 name = "qoder-autopilot"
-version = "0.3.0"
+version = "0.3.1"
 description = "Automated Qoder account registration with anti-detect browser, captcha solving (AI + OpenCV), and 9Router OAuth integration."
 readme = "README.md"
 license = "MIT"

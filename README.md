@@ -248,6 +248,22 @@ qoder-autopilot/
 └── README.md
 ```
 
+## 🔒 Security
+
+qoder-autopilot takes security seriously:
+
+- **Credential files** — `qoder_accounts.json` saved with `chmod 600` (owner-only)
+- **Config files** — `~/.qoder-autopilot/config.json` and `relay.json` restricted to `600`
+- **Password masking** — passwords never logged to stdout (masked as `••••••••`)
+- **Sensitive field masking** — `config show` masks API keys, tokens, and passwords
+- **File locking** — concurrent credential writes are atomic (safe in `--parallel` mode)
+- **Timing-safe auth** — relay token comparison uses `hmac.compare_digest()`
+- **Rate limiting** — relay server limits to 30 requests/60s per IP
+- **Secure default binding** — relay defaults to `127.0.0.1` (localhost only)
+- **HTTPS warning** — startup warns when relay runs without TLS
+
+> **Recommendation:** For production relay deployments, always use a reverse proxy with HTTPS (nginx/caddy) or an SSH tunnel.
+
 ## 🔗 Related
 
 - [**cf-mail-worker**](https://github.com/Daivageralda/cf-mail-worker) — Self-hosted temp mail API (Cloudflare Workers + D1)
