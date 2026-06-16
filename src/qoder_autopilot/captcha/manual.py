@@ -9,7 +9,7 @@ import asyncio
 import time
 
 from .. import config
-from ..logger import log, log_ok, log_err
+from ..logger import log, log_err, log_ok
 
 
 async def handle_captcha_manual(page) -> bool:

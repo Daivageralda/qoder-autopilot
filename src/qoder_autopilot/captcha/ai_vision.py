@@ -17,7 +17,6 @@ import base64
 import json
 import re
 import time
-from pathlib import Path
 
 from .. import config
 from ..logger import log
@@ -36,9 +35,9 @@ async def gemini_detect_gap(page) -> float | None:
         The X offset scaled to track width, or None on failure.
     """
     try:
-        from openai import OpenAI
         import cv2
         import numpy as np
+        from openai import OpenAI
 
         api_key = config.AI_API_KEY
         if not api_key:

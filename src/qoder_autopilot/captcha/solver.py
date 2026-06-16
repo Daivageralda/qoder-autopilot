@@ -18,12 +18,11 @@ import random
 import time
 
 from .. import config
-from ..logger import log, log_ok, log_err
+from ..logger import log, log_err, log_ok
 from .ai_vision import gemini_detect_gap
+from .manual import handle_captcha_manual
 from .opencv_detect import detect_gap_position
 from .slider import slide_puzzle
-from .manual import handle_captcha_manual
-
 
 # CSS selectors for detecting captcha presence
 _CAPTCHA_DETECT_SELECTORS = """

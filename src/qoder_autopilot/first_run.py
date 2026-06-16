@@ -7,8 +7,6 @@ Usage:
     Called automatically by cli.main() when no config exists.
 """
 
-import sys
-from pathlib import Path
 
 from .user_config import CONFIG_FILE
 
@@ -45,11 +43,11 @@ def run_first_run_wizard() -> bool:
     print(f"  {BOLD}How do you want to set up temp mail?{NC}")
     print()
     print(f"  {GREEN}[1]{NC} 🚀 {BOLD}Quick Start{NC}")
-    print(f"      Use the default public worker — instant, no setup.")
+    print("      Use the default public worker — instant, no setup.")
     print(f"      {DIM}Great for trying out or casual use.{NC}")
     print()
     print(f"  {GREEN}[2]{NC} 🏠 {BOLD}Self-Host{NC}")
-    print(f"      Deploy your own Cloudflare Worker — independent, your domain.")
+    print("      Deploy your own Cloudflare Worker — independent, your domain.")
     print(f"      {DIM}Takes ~5 minutes. Needs Cloudflare account + domain.{NC}")
     print()
 

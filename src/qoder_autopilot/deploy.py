@@ -8,7 +8,6 @@ Usage:
     qoder-autopilot deploy
 """
 
-import os
 import shutil
 import subprocess
 import sys
@@ -269,10 +268,9 @@ def deploy_worker() -> None:
         sys.exit(1)
 
     # Step 2: Check Cloudflare auth
-    if not check_wrangler_auth():
-        if not wrangler_login():
-            err("Cloudflare authentication failed")
-            sys.exit(1)
+    if not check_wrangler_auth() and not wrangler_login():
+        err("Cloudflare authentication failed")
+        sys.exit(1)
 
     # Step 3: Extract template
     print()
@@ -305,15 +303,15 @@ def deploy_worker() -> None:
         print(f"  {GREEN}{BOLD}🎉 Deploy complete!{NC}")
         print()
         print(f"  {CYAN}Don't forget to enable Email Routing in Cloudflare Dashboard:{NC}")
-        print(f"  Email → Routing Rules → Catch-all → Send to Worker")
+        print("  Email → Routing Rules → Catch-all → Send to Worker")
         print()
         print(f"  {CYAN}Run qoder-autopilot to start:{NC}")
-        print(f"  qoder-autopilot --manual-captcha")
+        print("  qoder-autopilot --manual-captcha")
         print()
     else:
         print()
         warn("Worker URL not detected. You can set it manually:")
-        print(f"  qoder-autopilot config set worker-url https://your-worker.workers.dev")
+        print("  qoder-autopilot config set worker-url https://your-worker.workers.dev")
         print()
 
     # Cleanup: ask if user wants to keep the extracted files

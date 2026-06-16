@@ -27,8 +27,7 @@ import requests
 
 from . import config
 from .errors import TempMailError
-from .logger import log, log_ok, log_err
-
+from .logger import log, log_err, log_ok
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # BASE CLASS
@@ -297,6 +296,6 @@ def create_temp_mail(provider: str | None = None) -> TempMailProvider:
 
 
 # Backward compat: TempMail() returns the default provider
-def TempMail() -> TempMailProvider:
+def TempMail() -> TempMailProvider:  # noqa: N802
     """Backward-compatible alias for create_temp_mail()."""
     return create_temp_mail()

@@ -16,11 +16,11 @@ import random
 import time
 
 from . import config
-from .logger import log, log_ok, log_err, log_step
-from .temp_mail import TempMail
-from .otp import extract_otp
-from .captcha.solver import CaptchaSolver
 from .browser.window_tiler import tile_all_camoufox_windows
+from .captcha.solver import CaptchaSolver
+from .logger import log, log_err, log_ok, log_step
+from .otp import extract_otp
+from .temp_mail import TempMail
 
 
 async def register_and_verify(

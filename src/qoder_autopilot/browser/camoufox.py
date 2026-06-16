@@ -6,8 +6,8 @@ Camoufox provides C++-level stealth fingerprinting to bypass bot detection.
 """
 
 import random
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
 
 from ..logger import log
 

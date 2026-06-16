@@ -18,8 +18,8 @@ import uuid
 from datetime import datetime, timedelta, timezone
 
 from . import config
-from .errors import NineRouterError, NineRouterDBNotFound
-from .logger import log, log_ok, log_err
+from .errors import NineRouterDBNotFound, NineRouterError
+from .logger import log, log_ok
 
 
 def add_to_9router_device(

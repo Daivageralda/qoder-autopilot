@@ -12,20 +12,21 @@ Usage:
 import argparse
 import asyncio
 import os
-import sys
+import platform
 import random
+import sys
 
 from . import config
-from .errors import NineRouterError, NineRouterDBNotFound
-from .logger import log, log_ok, log_err, log_step, log_warn, set_account_tag
-from .temp_mail import TempMail
-from .identity import gen_identity
-from .credentials import save_creds
-from .oauth import initiate_device_flow, poll_device_token
-from .ninerouter import add_to_9router_device
-from .register import register_and_verify
 from .browser.camoufox import launch_browser, setup_page
 from .browser.window_tiler import get_screen_size
+from .credentials import save_creds
+from .errors import NineRouterDBNotFound, NineRouterError
+from .identity import gen_identity
+from .logger import log, log_err, log_ok, log_warn, set_account_tag
+from .ninerouter import add_to_9router_device
+from .oauth import initiate_device_flow, poll_device_token
+from .register import register_and_verify
+from .temp_mail import TempMail
 
 
 async def run_one(
@@ -238,10 +239,6 @@ async def main_async(args: argparse.Namespace) -> None:
 
 def main() -> None:
     """CLI entry point with config management subcommand."""
-    from .user_config import (
-        load_user_config, save_user_config, delete_user_config,
-        set_user_config_value, USER_CONFIGURABLE, CONFIG_FILE,
-    )
 
     # ── Quick check for subcommands before full argparse ──
     if len(sys.argv) > 1:
@@ -305,8 +302,11 @@ def main() -> None:
 def _handle_config_command(argv: list[str]) -> None:
     """Handle 'qoder-autopilot config' subcommands."""
     from .user_config import (
-        load_user_config, save_user_config, delete_user_config,
-        set_user_config_value, USER_CONFIGURABLE, CONFIG_FILE,
+        CONFIG_FILE,
+        USER_CONFIGURABLE,
+        delete_user_config,
+        load_user_config,
+        set_user_config_value,
     )
 
     if not argv or argv[0] in ("-h", "--help"):
@@ -319,7 +319,7 @@ def _handle_config_command(argv: list[str]) -> None:
         print("  reset                   Reset all settings to defaults")
         print()
         print("Configurable keys:")
-        for key, info in USER_CONFIGURABLE.items():
+        for _key, info in USER_CONFIGURABLE.items():
             cli = info["cli_flag"]
             print(f"  {cli:20s} {info['description']}")
         print()

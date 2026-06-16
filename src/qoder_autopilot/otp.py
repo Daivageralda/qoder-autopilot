@@ -7,7 +7,6 @@ Handles various email templates and filters out CSS color codes.
 
 import re
 
-
 # Common CSS color codes that look like 6-digit numbers but aren't OTPs
 _CSS_COLORS = {
     "000000", "111111", "222222", "333333", "444444", "555555", "666666",

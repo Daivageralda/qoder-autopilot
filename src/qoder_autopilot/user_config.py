@@ -91,7 +91,7 @@ def load_user_config() -> dict:
     if not CONFIG_FILE.exists():
         return {}
     try:
-        with open(CONFIG_FILE, "r") as f:
+        with open(CONFIG_FILE) as f:
             return json.load(f)
     except (json.JSONDecodeError, OSError):
         return {}

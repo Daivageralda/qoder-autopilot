@@ -65,7 +65,7 @@ class CaptchaTimeoutError(CaptchaError):
         )
 
 
-class CaptchaAIFailed(CaptchaError):
+class CaptchaAIFailed(CaptchaError):  # noqa: N818
     """AI vision captcha solving failed."""
 
     def __init__(self, reason: str = "unknown"):
@@ -101,7 +101,7 @@ class OAuthError(QoderAutopilotError):
     """OAuth / PKCE flow error."""
 
 
-class DeviceTokenTimeout(OAuthError):
+class DeviceTokenTimeout(OAuthError):  # noqa: N818
     """Device token polling timed out."""
 
     def __init__(self, max_wait: int = 240):
@@ -117,7 +117,7 @@ class NineRouterError(QoderAutopilotError):
     """9Router integration error."""
 
 
-class NineRouterDBNotFound(NineRouterError):
+class NineRouterDBNotFound(NineRouterError):  # noqa: N818
     """9Router SQLite database file not found."""
 
     def __init__(self, path: str):

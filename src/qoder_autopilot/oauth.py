@@ -17,13 +17,13 @@ import hashlib
 import os
 import time
 import uuid
-from urllib.parse import quote as url_quote, urlencode
+from urllib.parse import quote as url_quote
+from urllib.parse import urlencode
 
 import requests
 
 from . import config
-from .errors import OAuthError, DeviceTokenTimeout
-from .logger import log, log_ok, log_err
+from .logger import log, log_err, log_ok
 
 
 def base64url_encode(data: bytes) -> str:

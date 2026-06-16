@@ -22,8 +22,7 @@ from pathlib import Path
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from .user_config import load_user_config, USER_CONFIGURABLE
-
+from .user_config import load_user_config
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # PATHS (non-prefixed, resolved at import time)
