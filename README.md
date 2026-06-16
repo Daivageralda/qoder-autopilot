@@ -142,6 +142,9 @@ qoder-autopilot -n 3 --manual-captcha --delay 60
 | `--verbose`, `-v` | Show debug-level logs | `false` |
 | `--quiet`, `-q` | Only show errors and warnings | `false` |
 | `--dry-run` | Validate configuration and exit | `false` |
+| `--proxy URL` | Proxy for browser (socks5://host:port, http://host:port) | `none` |
+| `--format {text,json,csv}` | Output format for results | `text` |
+| `--log-file PATH` | Write all logs to a file | `none` |
 | `--no-oauth` | Skip 9Router OAuth, just register | `false` |
 | `--parallel` | Run all accounts concurrently | `false` |
 | `--delay N` | Delay between sequential accounts (seconds) | `30` |

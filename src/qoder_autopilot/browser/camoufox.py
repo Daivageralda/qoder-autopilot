@@ -17,6 +17,7 @@ async def launch_browser(
     headless: bool = True,
     window_width: int = 900,
     window_height: int = 600,
+    proxy: str | None = None,
 ) -> AsyncIterator:
     """Launch a Camoufox browser instance with stealth settings.
 
@@ -24,6 +25,7 @@ async def launch_browser(
         headless: Run in headless mode (no visible window).
         window_width: Browser window width in pixels.
         window_height: Browser window height in pixels.
+        proxy: Proxy URL (e.g. socks5://host:port, http://host:port).
 
     Yields:
         Camoufox browser context manager.
@@ -33,11 +35,16 @@ async def launch_browser(
     os_choice = random.choice(["windows", "macos", "linux"])
     log(f"   🦊 Launching Camoufox (headless={headless}, os={os_choice})...")
 
-    async with AsyncCamoufox(
-        headless=headless,
-        os=os_choice,
-        window=(window_width, window_height),
-    ) as browser:
+    kwargs: dict = {
+        "headless": headless,
+        "os": os_choice,
+        "window": (window_width, window_height),
+    }
+    if proxy:
+        kwargs["proxy"] = {"server": proxy}
+        log(f"   🌐 Using proxy: {proxy}")
+
+    async with AsyncCamoufox(**kwargs) as browser:
         yield browser
 
 

@@ -7,9 +7,11 @@ Zero extra dependencies — uses ANSI escape codes directly.
 Usage:
     from qoder_autopilot.logger import log, log_ok, log_err, log_step, log_warn
     from qoder_autopilot.logger import set_account_tag, get_account_tag
+    from qoder_autopilot.logger import set_log_file, close_log_file
 """
 
 import contextvars
+import re
 import sys
 from datetime import datetime
 
@@ -51,6 +53,10 @@ _use_colors: bool = hasattr(sys.stdout, "isatty") and sys.stdout.isatty()
 # Verbosity: 0=quiet, 1=normal (default), 2=verbose
 _verbosity: int = 1
 
+# Log file handle (F6)
+_log_file = None
+_ansi_re = re.compile(r"\033\[[0-9;]*m")
+
 
 def set_verbosity(level: int) -> None:
     """Set logging verbosity. 0=quiet (errors only), 1=normal, 2=verbose (debug)."""
@@ -61,6 +67,28 @@ def set_verbosity(level: int) -> None:
 def get_verbosity() -> int:
     """Get current verbosity level."""
     return _verbosity
+
+
+def set_log_file(path: str):
+    """Enable writing all log output to a file (in addition to terminal).
+
+    Args:
+        path: File path to write logs to.
+
+    Returns:
+        The opened file handle.
+    """
+    global _log_file  # noqa: PLW0603
+    _log_file = open(path, "a", encoding="utf-8")  # noqa: SIM115
+    return _log_file
+
+
+def close_log_file() -> None:
+    """Close the log file handle if open."""
+    global _log_file  # noqa: PLW0603
+    if _log_file:
+        _log_file.close()
+        _log_file = None
 
 
 def _c(color: str, text: str) -> str:
@@ -101,7 +129,16 @@ def log(
     badge = _c(color, f"{_BOLD}{label}")
     message = _c(color, msg) if level in ("ERROR", "WARN") else msg
 
-    print(f"{timestamp} {badge} {tag_str}{message}")
+    output = f"{timestamp} {badge} {tag_str}{message}"
+    print(output)
+
+    # F6: Write to log file (strip ANSI codes)
+    if _log_file:
+        plain_ts = ts
+        plain_tag = f"[{tag}] " if tag else ""
+        plain_msg = _ansi_re.sub("", msg)
+        _log_file.write(f"{plain_ts} {label} {plain_tag}{plain_msg}\n")
+        _log_file.flush()
 
 
 def log_ok(msg: str) -> None:

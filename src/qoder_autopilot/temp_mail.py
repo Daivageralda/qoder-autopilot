@@ -109,12 +109,13 @@ class CloudflareProvider(TempMailProvider):
 
     def __init__(self, worker_url: str | None = None):
         self.url = (worker_url or config.WORKER_URL).rstrip("/")
+        self._session = requests.Session()  # R4: connection pooling
 
     def generate(self) -> dict:
         last_err = None
         for attempt in range(1, 4):  # 3 retries
             try:
-                r = requests.post(f"{self.url}/api/generate", timeout=15)
+                r = self._session.post(f"{self.url}/api/generate", timeout=15)
                 r.raise_for_status()
             except requests.RequestException as e:
                 last_err = str(e)
@@ -138,7 +139,7 @@ class CloudflareProvider(TempMailProvider):
 
     def inbox(self, address: str) -> list[dict]:
         try:
-            r = requests.get(f"{self.url}/api/inbox/{url_quote(address)}", timeout=15)
+            r = self._session.get(f"{self.url}/api/inbox/{url_quote(address)}", timeout=15)
             r.raise_for_status()
         except requests.RequestException as e:
             raise TempMailError("Inbox fetch failed", str(e)) from e
@@ -148,7 +149,7 @@ class CloudflareProvider(TempMailProvider):
 
     def message(self, msg_id: str) -> dict | None:
         try:
-            r = requests.get(f"{self.url}/api/message/{msg_id}", timeout=15)
+            r = self._session.get(f"{self.url}/api/message/{msg_id}", timeout=15)
             r.raise_for_status()
         except requests.RequestException as e:
             raise TempMailError("Message fetch failed", str(e)) from e
@@ -192,6 +193,7 @@ class MocaProvider(TempMailProvider):
             )
         self.base = (base_url or config.MOCA_BASE_URL).rstrip("/")
         self._owner_token: str | None = None
+        self._session = requests.Session()  # R4: connection pooling
 
     def _headers(self) -> dict:
         return {"x-api-key": self.api_key, "Content-Type": "application/json"}
@@ -203,7 +205,7 @@ class MocaProvider(TempMailProvider):
             url += f"&{k}={url_quote(str(v))}"
 
         try:
-            r = requests.request(
+            r = self._session.request(
                 method,
                 url,
                 headers=self._headers(),

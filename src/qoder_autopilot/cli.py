@@ -23,7 +23,7 @@ from .browser.window_tiler import get_screen_size
 from .credentials import save_creds
 from .errors import NineRouterDBNotFound, NineRouterError
 from .identity import gen_identity
-from .logger import log, log_err, log_ok, log_warn, set_account_tag
+from .logger import log, log_debug, log_err, log_ok, log_warn, set_account_tag
 from .ninerouter import add_to_9router_device
 from .oauth import initiate_device_flow, poll_device_token
 from .register import register_and_verify
@@ -35,6 +35,7 @@ async def run_one(
     use_oauth: bool = True,
     manual_captcha: bool = False,
     acct_num: int = 0,
+    proxy: str | None = None,
 ) -> dict | None:
     """Register a single Qoder account and optionally connect to 9Router.
 
@@ -93,6 +94,7 @@ async def run_one(
         headless=headless,
         window_width=win_w,
         window_height=win_h,
+        proxy=proxy,
     ) as browser:
         page = await browser.new_page()
         await setup_page(page)
@@ -232,6 +234,17 @@ async def main_async(args: argparse.Namespace) -> None:
     elif args.quiet:
         set_verbosity(0)
 
+    # F6: Log file
+    log_file_handle = None
+    if args.log_file:
+        from .logger import set_log_file
+
+        log_file_handle = set_log_file(args.log_file)
+        log(f"📝 Logging to: {args.log_file}")
+
+    proxy = args.proxy
+    output_format = args.output_format
+
     # U5: Dry-run mode
     if args.dry_run:
         log_ok("Dry-run mode: configuration is valid ✅")
@@ -262,6 +275,7 @@ async def main_async(args: argparse.Namespace) -> None:
                 use_oauth=use_oauth,
                 manual_captcha=manual_captcha,
                 acct_num=i + 1,
+                proxy=proxy,
             )
 
         tasks = [staggered_run(i) for i in range(args.count)]
@@ -281,6 +295,7 @@ async def main_async(args: argparse.Namespace) -> None:
                 use_oauth=use_oauth,
                 manual_captcha=manual_captcha,
                 acct_num=i + 1 if args.count > 1 else 0,
+                proxy=proxy,
             )
             results.append(r)
             if i < args.count - 1:
@@ -290,6 +305,37 @@ async def main_async(args: argparse.Namespace) -> None:
 
     s = sum(1 for r in results if r)
     log(f"\n{'═' * 60}\n📊 DONE: {s}/{len(results)} succeeded\n{'═' * 60}")
+
+    # F5: Output results in requested format
+    valid_results = [r for r in results if r]
+    if output_format == "json":
+        import json
+
+        print(json.dumps(valid_results, indent=2))
+    elif output_format == "csv":
+        if valid_results:
+            keys = list(valid_results[0].keys())
+            print(",".join(keys))
+            for r in valid_results:
+                print(",".join(str(r.get(k, "")) for k in keys))
+
+    # H7: Screenshot cleanup — delete screenshots from successful runs
+    try:
+        import shutil
+
+        if config.SCREENSHOTS_DIR.exists() and not any(config.SCREENSHOTS_DIR.glob("*fail*")):
+            # Only clean up if no failure screenshots exist
+            shutil.rmtree(config.SCREENSHOTS_DIR, ignore_errors=True)
+            log_debug("Cleaned up debug screenshots (all runs succeeded)")
+    except Exception:
+        pass
+
+    # F6: Close log file
+    if log_file_handle:
+        from .logger import close_log_file
+
+        close_log_file()
+        log(f"📝 Log saved to: {args.log_file}")
 
 
 def main() -> None:
@@ -407,6 +453,27 @@ def main() -> None:
         "--dry-run",
         action="store_true",
         help="Validate configuration and exit without registering",
+    )
+    p.add_argument(
+        "--proxy",
+        type=str,
+        default=None,
+        metavar="URL",
+        help="Proxy URL for browser (e.g. socks5://host:port, http://host:port)",
+    )
+    p.add_argument(
+        "--format",
+        choices=["text", "json", "csv"],
+        default="text",
+        dest="output_format",
+        help="Output format for results (default: text)",
+    )
+    p.add_argument(
+        "--log-file",
+        type=str,
+        default=None,
+        metavar="PATH",
+        help="Write all logs to a file (in addition to terminal)",
     )
     args = p.parse_args()
 
