@@ -5,10 +5,16 @@ Automated [Qoder](https://qoder.com) account registration with anti-detect brows
 > Register Qoder accounts → solve captchas → verify OTP → auto-connect to 9Router. All in one command.
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![PyPI version](https://img.shields.io/pypi/v/qoder-autopilot.svg)](https://pypi.org/project/qoder-autopilot/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Camoufox](https://img.shields.io/badge/browser-Camoufox-orange.svg)](https://camoufox.com/)
+[![Tests](https://github.com/Daivageralda/qoder-autopilot/actions/workflows/test.yml/badge.svg)](https://github.com/Daivageralda/qoder-autopilot/actions/workflows/test.yml)
 
 ---
+
+> **📦 Published on PyPI** — [pypi.org/project/qoder-autopilot](https://pypi.org/project/qoder-autopilot/)
+>
+> Install with `pip install qoder-autopilot` — no clone needed.
 
 ## ✨ Features
 
@@ -26,13 +32,26 @@ Automated [Qoder](https://qoder.com) account registration with anti-detect brows
 
 ## 📦 Installation
 
-### From source (recommended)
+### Via pip (recommended)
+
+```bash
+# Basic install (manual captcha only)
+pip install qoder-autopilot
+
+# With AI captcha solver support
+pip install qoder-autopilot[captcha]
+
+# Full install with all extras
+pip install qoder-autopilot[full]
+```
+
+### From source (development)
 
 ```bash
 git clone https://github.com/Daivageralda/qoder-autopilot.git
 cd qoder-autopilot
 
-# Basic install (manual captcha only)
+# Basic install
 pip install -e .
 
 # With AI captcha solver
@@ -40,12 +59,6 @@ pip install -e ".[captcha]"
 
 # Full install + dev tools
 pip install -e ".[dev]"
-```
-
-### Via pip
-
-```bash
-pip install qoder-autopilot
 ```
 
 ### Post-install
@@ -163,7 +176,7 @@ qoder-autopilot config reset
 | `otp-timeout` | Max seconds to wait for OTP | `20` |
 | `captcha-timeout` | Max seconds for manual captcha | `120` |
 | `parallel-delay` | Delay between parallel accounts (sec) | `30` |
-| `ninerouter-db` | Path to 9Router SQLite DB | `~/.9router/db/data.sqlite` |
+| `ninerouter-db` | Path to 9Router SQLite DB | OS-aware: `~/.9router/db/data.sqlite` (macOS/Linux), `%APPDATA%/9router/db/data.sqlite` (Windows) |
 
 ### Via environment variables
 
