@@ -15,13 +15,14 @@ Automated [Qoder](https://qoder.com) account registration with anti-detect brows
 - **🦊 Anti-detect Browser** — Uses [Camoufox](https://camoufox.com/) (stealth Firefox fork) with C++-level fingerprinting to bypass bot detection
 - **🧩 Multi-strategy Captcha Solving**
   - AI Vision (Gemini/GPT via OpenAI-compatible API)
-  - OpenCV (4-method computer vision: brightness, edge, template match, SQDIFF)
   - Manual mode (pause and solve it yourself)
-- **📧 Auto Email + OTP** — Generates temp email via Cloudflare Worker, auto-extracts OTP
+- **📧 Multi-Provider Temp Mail** — Cloudflare Workers (default) or Moca Supabase
 - **🔐 OAuth Device Flow** — PKCE-based device token flow (reverse-engineered from 9Router)
 - **🔌 9Router Auto-Connect** — Inserts device tokens directly into 9Router's SQLite database
-- **⚡ Parallel Mode** — Register multiple accounts concurrently with 2×2 window grid tiling
-- **🪟 macOS Grid Tiling** — Auto-arranges browser windows in a 2×2 grid via AppleScript
+- **🚀 First-Run Wizard** — Interactive setup on first launch
+- **🏠 Built-in Worker Deploy** — Deploy your own temp mail worker from CLI
+- **⚡ Parallel Mode** — Register multiple accounts concurrently
+- **⚙️ Persistent Config** — `qoder-autopilot config` for easy customization
 
 ## 📦 Installation
 
@@ -41,7 +42,7 @@ pip install -e ".[captcha]"
 pip install -e ".[dev]"
 ```
 
-### Via pip (coming soon)
+### Via pip
 
 ```bash
 pip install qoder-autopilot
@@ -59,70 +60,144 @@ playwright install firefox
 
 ## 🚀 Quick Start
 
-### 1. Configure
+First time? Just run:
 
 ```bash
-cp .env.example .env
-# Edit .env with your settings (temp mail worker URL, AI API key, etc.)
+qoder-autopilot
 ```
 
-### 2. Run
+You'll see the setup wizard:
+
+```
+  ╔══════════════════════════════════════════════════╗
+  ║       👋 Welcome to qoder-autopilot!             ║
+  ║       Let's get you set up in 30 seconds.        ║
+  ╚══════════════════════════════════════════════════╝
+
+  [1] 🚀 Quick Start — use the default public worker
+  [2] 🏠 Self-Host — deploy your own Cloudflare Worker
+```
+
+Pick **1** for instant setup, or **2** to deploy your own temp mail service.
+
+### Registration commands
 
 ```bash
 # Single account, manual captcha (most reliable)
 qoder-autopilot --manual-captcha
 
-# 5 accounts in parallel, manual captcha
+# 5 accounts sequentially
+qoder-autopilot -n 5 --manual-captcha
+
+# 5 accounts in parallel
 qoder-autopilot -n 5 --manual-captcha --parallel
 
-# Headless mode (requires AI captcha solver configured)
-qoder-autopilot -n 3
-
-# Just register, skip 9Router connection
+# Skip OAuth/9Router, just register
 qoder-autopilot --manual-captcha --no-oauth
+
+# Show browser windows
+qoder-autopilot --manual-captcha --no-headless
+
+# Custom delay between accounts (seconds)
+qoder-autopilot -n 3 --manual-captcha --delay 60
 ```
 
-### 3. Or use as a library
+## 📋 All Commands
 
-```python
-import asyncio
-from qoder_autopilot import run_one
-
-async def main():
-    result = await run_one(
-        headless=False,
-        manual_captcha=True,
-        use_oauth=True,
-    )
-    if result:
-        print(f"Registered: {result['email']}")
-
-asyncio.run(main())
-```
-
-## 📋 CLI Options
-
-| Flag | Description |
+| Command | Description |
 |---|---|
-| `-n`, `--count N` | Number of accounts to create (default: 1) |
-| `--no-headless` | Show browser windows |
-| `--no-oauth` | Skip 9Router OAuth flow, just register |
-| `--manual-captcha` | Pause for manual captcha solving (forces non-headless) |
-| `--parallel` | Run all accounts concurrently |
-| `--delay N` | Delay between sequential accounts (default: 30s) |
+| `qoder-autopilot` | First-run wizard (no config) or start registration |
+| `qoder-autopilot [options]` | Register accounts (see flags below) |
+| `qoder-autopilot deploy` | Deploy your own temp mail worker |
+| `qoder-autopilot config` | Show config help + available keys |
+| `qoder-autopilot config show` | Show all current settings with source |
+| `qoder-autopilot config get <key>` | Get a specific config value |
+| `qoder-autopilot config set <key> <value>` | Set a config value |
+| `qoder-autopilot config reset` | Reset all settings to defaults |
+
+### Registration flags
+
+| Flag | Description | Default |
+|---|---|---|
+| `-n`, `--count N` | Number of accounts to create | `1` |
+| `--manual-captcha` | Pause for manual captcha solving (forces non-headless) | `false` |
+| `--no-headless` | Show browser windows | `false` |
+| `--no-oauth` | Skip 9Router OAuth, just register | `false` |
+| `--parallel` | Run all accounts concurrently | `false` |
+| `--delay N` | Delay between sequential accounts (seconds) | `30` |
 
 ## ⚙️ Configuration
 
-All settings via environment variables or `.env` file:
+Three-tier priority: **Environment variables** → **User config** (`~/.qoder-autopilot/config.json`) → **Defaults**
 
-| Variable | Description | Default |
+### Via CLI (recommended)
+
+```bash
+# See all settings
+qoder-autopilot config show
+
+# Set values
+qoder-autopilot config set worker-url https://my-worker.workers.dev
+qoder-autopilot config set ai-api-key sk-abc123...
+qoder-autopilot config set otp-timeout 30
+qoder-autopilot config set mail-provider moca
+
+# Get a value
+qoder-autopilot config get worker-url
+
+# Reset everything
+qoder-autopilot config reset
+```
+
+### Configurable keys
+
+| Key | Description | Default |
 |---|---|---|
-| `QODER_WORKER_URL` | Cloudflare Worker URL for temp mail | *(required)* |
-| `QODER_AI_API_KEY` | API key for AI captcha solver | *(empty = manual mode)* |
-| `QODER_AI_BASE_URL` | OpenAI-compatible API base URL | `https://ai.sumopod.com/v1` |
-| `QODE...` | AI model name | `gemini/gemini-2.5-flash` |
-| `QODER_NINEROUTER_DB` | Path to 9Router SQLite database | `~/.9router/db/data.sqlite` |
-| `QODER_NINEROUTER_URL` | 9Router dashboard URL | `http://localhost:20128` |
+| `mail-provider` | Temp mail provider: `cloudflare` or `moca` | `cloudflare` |
+| `worker-url` | Cloudflare Worker URL | Built-in default |
+| `moca-api-key` | Moca Supabase API key (`tmk_xxx`) | *(empty)* |
+| `moca-base-url` | Moca Supabase base URL | *(built-in)* |
+| `ai-api-key` | API key for AI captcha solver | *(empty)* |
+| `ai-base-url` | OpenAI-compatible API base URL | `https://ai.sumopod.com/v1` |
+| `ai-model` | AI model name | `gemini/gemini-2.5-flash` |
+| `otp-timeout` | Max seconds to wait for OTP | `20` |
+| `captcha-timeout` | Max seconds for manual captcha | `120` |
+| `parallel-delay` | Delay between parallel accounts (sec) | `30` |
+| `ninerouter-db` | Path to 9Router SQLite DB | `~/.9router/db/data.sqlite` |
+
+### Via environment variables
+
+All keys can be set with `QODER_` prefix:
+
+```bash
+export QODER_WORKER_URL=https://my-worker.workers.dev
+export QODER_AI_API_KEY=sk-abc123...
+export QODER_OTP_TIMEOUT=30
+```
+
+### Via `.env` file
+
+```bash
+cp .env.example .env
+# Edit .env with your settings
+```
+
+## 🏠 Self-Host Temp Mail Worker
+
+Want your own independent temp mail service? Deploy in 5 minutes:
+
+```bash
+# From qoder-autopilot (bundled worker template)
+qoder-autopilot deploy
+
+# Or clone the standalone repo
+git clone https://github.com/Daivageralda/qoder-mail-worker.git
+cd qoder-mail-worker
+npm install
+npm run setup
+```
+
+See [qoder-mail-worker](https://github.com/Daivageralda/qoder-mail-worker) for full documentation.
 
 ## 🏗️ Architecture
 
@@ -130,25 +205,40 @@ All settings via environment variables or `.env` file:
 qoder-autopilot/
 ├── src/qoder_autopilot/
 │   ├── cli.py              # CLI entry point
-│   ├── config.py           # Environment configuration
+│   ├── config.py           # Pydantic Settings (env + user config + defaults)
+│   ├── user_config.py      # Persistent config manager (~/.qoder-autopilot/)
+│   ├── first_run.py        # First-run setup wizard
+│   ├── deploy.py           # Worker deploy (extract + setup)
 │   ├── register.py         # Main registration flow
-│   ├── temp_mail.py        # Temp email client
+│   ├── temp_mail.py        # Multi-provider temp email client
 │   ├── oauth.py            # PKCE device auth flow
 │   ├── otp.py              # Email OTP extraction
-│   ├── identity.py         # Random identity generation
+│   ├── identity.py         # Random identity generation (faker id_ID)
 │   ├── credentials.py      # Account credential storage
 │   ├── ninerouter.py       # 9Router SQLite integration
-│   ├── logger.py           # Context-aware logging
+│   ├── errors.py           # Custom exceptions
+│   ├── logger.py           # ANSI colored structured logging
 │   ├── browser/
 │   │   ├── camoufox.py     # Anti-detect browser launcher
 │   │   └── window_tiler.py # macOS window grid positioning
-│   └── captcha/
-│       ├── solver.py       # Orchestrator (AI → OpenCV → manual)
-│       ├── ai_vision.py    # AI vision gap detection
-│       ├── opencv_detect.py# 4-method OpenCV detection
-│       ├── slider.py       # Human-like mouse movement
-│       └── manual.py       # Manual solve pause/poll
+│   ├── captcha/
+│   │   ├── solver.py       # Orchestrator (AI → manual)
+│   │   ├── ai_vision.py    # AI vision gap detection
+│   │   └── manual.py       # Manual solve pause/poll
+│   └── worker_template/    # Bundled Cloudflare Worker (for deploy)
+│       ├── src/             # Worker JS source
+│       ├── schema.sql       # D1 database schema
+│       ├── package.json
+│       └── scripts/setup.sh
+├── tests/
+├── pyproject.toml
+└── README.md
 ```
+
+## 🔗 Related
+
+- [**qoder-mail-worker**](https://github.com/Daivageralda/qoder-mail-worker) — Self-hosted temp mail API (Cloudflare Workers + D1)
+- [**bulk-temp-mail**](https://github.com/Daivageralda/temp-mail-generator) — Full temp mail service with React frontend
 
 ## 📄 License
 
