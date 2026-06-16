@@ -18,6 +18,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Clear stale cache
+        run: |
+          # Force clear any stale cache entries from previous action versions
+          rm -rf ~/.cache/pip || true
+          rm -rf ~/Library/Caches/pip || true
+
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v6
         with:
