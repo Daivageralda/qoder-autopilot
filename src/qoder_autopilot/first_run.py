@@ -65,10 +65,33 @@ def run_first_run_wizard() -> bool:
 
         elif choice == "2":
             print()
-            from .deploy import deploy_worker
-            deploy_worker()
-            _mark_configured()
-            return True
+            print(f"  {BOLD}Do you already have a deployed worker?{NC}")
+            print()
+            print(f"  {GREEN}[a]{NC} 🆕 Deploy a new worker (~5 min)")
+            print(f"  {GREEN}[b]{NC} 🔗 I already have a worker URL")
+            print()
+
+            while True:
+                sub = input(f"  {BOLD}Pick [a/b]:{NC} ").strip().lower()
+
+                if sub == "a":
+                    from .deploy import deploy_worker
+                    deploy_worker()
+                    _mark_configured()
+                    return True
+
+                elif sub == "b":
+                    url = input(f"  {BOLD}[?] Worker URL:{NC} ").strip()
+                    if url and url.startswith("http"):
+                        from .deploy import save_worker_url
+                        save_worker_url(url.rstrip("/"))
+                        _mark_configured()
+                        return True
+                    else:
+                        print(f"  {YELLOW}Please enter a valid URL (https://...).{NC}")
+
+                else:
+                    print(f"  {YELLOW}Please enter a or b.{NC}")
 
         else:
             print(f"  {YELLOW}Please enter 1 or 2.{NC}")

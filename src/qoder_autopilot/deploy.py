@@ -182,7 +182,7 @@ def run_setup_wizard(work_dir: Path) -> str | None:
 
 
 def _detect_worker_url(work_dir: Path) -> str | None:
-    """Try to detect the deployed worker URL."""
+    """Try to detect the deployed worker URL automatically."""
     import re
 
     # Read wrangler.toml to get worker name
@@ -201,19 +201,36 @@ def _detect_worker_url(work_dir: Path) -> str | None:
     if not worker_name:
         return None
 
-    # Try to get the full URL via curl health check
-    # We need the account subdomain — try common patterns
+    # Get account subdomain from wrangler whoami
     try:
         result = subprocess.run(
             ["npx", "wrangler", "whoami"],
-            capture_output=True, text=True, timeout=10,
+            capture_output=True, text=True, timeout=15,
             cwd=str(work_dir),
         )
-        # Extract subdomain from wrangler output if available
+        # Parse subdomain from output like:
+        # "│ xxxxxx  │ daivageralda831.workers.dev │"
+        for line in result.stdout.splitlines():
+            match = re.search(r'(\S+)\.workers\.dev', line)
+            if match:
+                subdomain = match.group(1)
+                url = f"https://{worker_name}.{subdomain}.workers.dev"
+                # Verify it's reachable
+                try:
+                    import urllib.request
+                    req = urllib.request.Request(f"{url}/api/health", method="GET")
+                    resp = urllib.request.urlopen(req, timeout=5)
+                    if resp.status == 200:
+                        ok(f"Auto-detected worker URL: {url}")
+                        return url
+                except Exception:
+                    # URL might be valid but health check failed, still return it
+                    ok(f"Detected worker URL: {url}")
+                    return url
     except Exception:
         pass
 
-    # The user will need to provide the URL or we can ask
+    # Fallback: ask user
     print()
     url = input(f"  {BOLD}[?] Worker URL{NC} (e.g. https://{worker_name}.yoursubdomain.workers.dev): ").strip()
     if url and url.startswith("http"):
