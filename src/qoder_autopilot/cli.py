@@ -266,6 +266,10 @@ def main() -> None:
             deploy_worker()
             return
 
+        if sub == "relay":
+            _handle_relay_command(sys.argv[2:])
+            return
+
     # ── First-run wizard ──
     from .first_run import is_first_run, run_first_run_wizard
 
@@ -429,3 +433,49 @@ def _handle_config_command(argv: list[str]) -> None:
         print(f"❌ Unknown command: {cmd}")
         print("Run 'qoder-autopilot config --help' for usage")
         sys.exit(1)
+
+
+def _handle_relay_command(argv: list[str]) -> None:
+    """Handle 'qoder-autopilot relay' subcommand."""
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        prog="qoder-autopilot relay",
+        description="Start relay server for remote 9Router integration",
+    )
+    parser.add_argument(
+        "--host",
+        default="0.0.0.0",
+        help="Bind host (default: 0.0.0.0)",
+    )
+    parser.add_argument(
+        "--port",
+        type=int,
+        default=8765,
+        help="Bind port (default: 8765)",
+    )
+    parser.add_argument(
+        "--token",
+        default=None,
+        help="Custom auth token (default: auto-generate)",
+    )
+    parser.add_argument(
+        "--db",
+        default=None,
+        help="Custom 9Router DB path (default: auto-detect)",
+    )
+
+    if argv and argv[0] in ("-h", "--help"):
+        parser.print_help()
+        return
+
+    args = parser.parse_args(argv)
+
+    from .relay import start_relay
+
+    start_relay(
+        host=args.host,
+        port=args.port,
+        custom_token=args.token,
+        custom_db_path=args.db,
+    )

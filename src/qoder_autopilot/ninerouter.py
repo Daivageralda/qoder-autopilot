@@ -31,6 +31,9 @@ def add_to_9router_device(
 ) -> bool:
     """Add a Qoder connection to 9Router DB using device token response.
 
+    If a relay URL is configured, sends the token to the remote relay server.
+    Otherwise, inserts directly into the local SQLite database.
+
     Args:
         email: The Qoder account email.
         display_name: Display name for the connection.
@@ -42,6 +45,20 @@ def add_to_9router_device(
     Returns:
         True if successfully inserted, False otherwise.
     """
+    # Check if relay is configured
+    if config.settings.has_relay:
+        from .relay import send_to_relay
+
+        return send_to_relay(
+            relay_url=config.settings.ninerouter_relay_url,
+            relay_token=config.settings.ninerouter_relay_token,
+            email=email,
+            display_name=display_name,
+            device_token_body=device_token_body,
+            machine_id=machine_id,
+        )
+
+    # Local insert (existing logic)
     db = db_path or config.NINEROUTER_DB
     log("💾 Adding to 9Router DB (device token flow)...")
 

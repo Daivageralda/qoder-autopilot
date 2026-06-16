@@ -150,6 +150,14 @@ class Settings(BaseSettings):
         default_factory=_default_ninerouter_db,
         description="Path to 9Router SQLite database (OS-aware default)",
     )
+    ninerouter_relay_url: str = Field(
+        default="",
+        description="Remote relay server URL (e.g., http://myvps:8765)",
+    )
+    ninerouter_relay_token: str = Field(
+        default="",
+        description="Auth token for relay server",
+    )
 
     # ── AI Captcha (optional) ─────────────────────────────────────────────
     ai_api_key: str = Field(
@@ -202,6 +210,11 @@ class Settings(BaseSettings):
         """Check if 9Router DB exists and is accessible."""
         db_path = os.path.expanduser(self.ninerouter_db)
         return os.path.exists(db_path)
+
+    @property
+    def has_relay(self) -> bool:
+        """Check if remote relay is configured."""
+        return bool(self.ninerouter_relay_url and self.ninerouter_relay_token)
 
     @property
     def ninerouter_db_path(self) -> str:

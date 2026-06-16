@@ -79,6 +79,16 @@ USER_CONFIGURABLE = {
         "cli_flag": "ninerouter-db",
         "type": "str",
     },
+    "ninerouter_relay_url": {
+        "description": "Remote relay server URL (e.g., http://myvps:8765)",
+        "cli_flag": "ninerouter-relay-url",
+        "type": "str",
+    },
+    "ninerouter_relay_token": {
+        "description": "Auth token for relay server",
+        "cli_flag": "ninerouter-relay-token",
+        "type": "str",
+    },
 }
 
 

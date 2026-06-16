@@ -9,7 +9,7 @@ build-backend = "hatchling.build"
 # ── Project Metadata ──────────────────────────────
 [project]
 name = "qoder-autopilot"
-version = "0.2.2"
+version = "0.3.0"
 description = "Automated Qoder account registration with anti-detect browser, captcha solving (AI + OpenCV), and 9Router OAuth integration."
 readme = "README.md"
 license = "MIT"
@@ -53,9 +53,14 @@ captcha = [
     "numpy>=1.24",
     "openai>=1.0",
 ]
+# Relay server for remote 9Router integration
+relay = [
+    "fastapi>=0.100",
+    "uvicorn[standard]>=0.23",
+]
 # Install everything
 all = [
-    "qoder-autopilot[captcha]",
+    "qoder-autopilot[captcha,relay]",
 ]
 # Development dependencies
 dev = [
@@ -122,6 +127,10 @@ known-first-party = ["qoder_autopilot"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 asyncio_mode = "auto"
+norecursedirs = ["src", "node_modules", ".venv", "*.egg-info"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "integration: marks tests that require external services",
